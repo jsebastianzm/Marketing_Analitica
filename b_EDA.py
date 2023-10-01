@@ -66,7 +66,7 @@ cr=pd.read_sql(consulta_sql, conn)
 
 
 ###Nombres de columnas con numeros o guiones se deben poner en doble comilla para que se reconozcan
-#Se analiza la calificación dadas a las peliculas por los usuarios
+#Se analiza la calificación dada a las peliculas por los usuarios
 data  = go.Bar( x=cr.rating,y=cr.n_movies, text=cr.n_movies, textposition="outside")
 Layout=go.Layout(title="Count of ratings",xaxis={'title':'Rating'},yaxis={'title':'Count movies'})
 go.Figure(data,Layout)
