@@ -52,6 +52,109 @@ movies.duplicated().sum()
 
 ratings.rating.unique()
 
+
+
+
+
+###1
+pd.read_sql("select * from ratings", conn)
+
+
+pd.read_sql("""select count(*) from movies""", conn)
+
+###2
+pd.read_sql("""select count(distinct userId) from ratings""", conn)
+
+
+####3
+pd.read_sql("""select movieId, avg(rating)
+            from ratings
+            where movieId=1
+            group by movieId order by userId asc""", conn)
+
+####4
+pd.read_sql("""select a.title, count(b.rating) as cnt
+            from movies a left join ratings b on a.movieId=b.movieId 
+            group by a.title where b.rating is null order by cnt asc """, conn)
+
+####5
+pd.read_sql("""select a.title, count(b.rating) as cnt
+            from movies a left join ratings b on a.movieId=b.movieId 
+            group by a.title having cnt=1 order by cnt asc """, conn)
+
+####6 
+pd.read_sql("""select genres, count(*) as cnt
+            from movies 
+            group by genres 
+            order by cnt desc limit 8,1 """, conn)
+
+pd.read_sql("""with t1 as (select genres, count(*) as cnt 
+            from movies 
+            group by genres 
+            order by cnt desc limit 9) select * from t1 order by cnt asc limit 1 """, conn)
+
+
+pd.read_sql("""select userId, avg(rating)
+            from ratings
+            group by userId order by userId asc""", conn)
+
+
+#### 1.	¿Cuál es la película con la calificación promedio más alta?
+consulta_sql = """
+    SELECT m.title, AVG(r.rating) as calificacion
+    FROM movies m
+    LEFT JOIN ratings r ON m.movieId = r.movieId
+    GROUP BY m.title
+    ORDER BY calificacion DESC 
+    LIMIT 1
+"""
+pd.read_sql(consulta_sql, conn)
+
+
+#### 2.	¿Cuáles son las 10 películas más populares (con más calificaciones) junto con el número total de calificaciones que han recibido?
+consulta_sql = """
+    SELECT m.title, COUNT(r.rating) as total_calificacion
+    FROM movies m
+    LEFT JOIN ratings r ON m.movieId = r.movieId
+    GROUP BY m.title
+    ORDER BY total_calificacion DESC 
+    LIMIT 10
+"""
+pd.read_sql(consulta_sql, conn)
+
+#### 3. ¿Cuál es la película con el rating promedio más bajo que tiene al menos 100 calificaciones?
+consulta_sql = """
+    SELECT m.title, AVG(r.rating) AS promedio_calificacion
+    FROM movies m
+    JOIN ratings r ON m.movieId = r.movieId
+    GROUP BY m.title
+    HAVING COUNT(r.rating) >= 100
+    ORDER BY promedio_calificacion
+    LIMIT 1
+"""
+pd.read_sql(consulta_sql, conn)
+
+### 4.	¿Cuántos usuarios han calificado al menos 50 películas diferentes?
+consulta_sql = """
+    SELECT userId, COUNT(DISTINCT movieId) AS numero_peliculas
+    FROM ratings
+    GROUP BY userId
+    HAVING numero_peliculas >= 50
+"""
+pd.read_sql(consulta_sql, conn)
+
+
+#### 5.	¿Cuál es el género más popular basado en la cantidad total de películas en ese género?
+consulta_sql = """
+    SELECT SUBSTR(genres, 1, INSTR(genres, '|') - 1) AS genero, COUNT(*) AS total_peliculas
+    FROM movies
+    GROUP BY genero
+    ORDER BY total_peliculas DESC
+"""
+pd.read_sql(consulta_sql, conn)
+
+
+
 consulta_sql = """
     SELECT rating, COUNT(*) AS n_movies
     FROM ratings
