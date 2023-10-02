@@ -182,12 +182,6 @@ ratings.info()
 ratings.head(10)
 
 
-
-
-
-
-
-
 movies=pd.read_sql("""select * from movies""", conn)
 genres=movies['genres'].str.split('|')
 te = TransactionEncoder()
