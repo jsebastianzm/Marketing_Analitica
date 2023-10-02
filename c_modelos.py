@@ -5,6 +5,7 @@ from sklearn.preprocessing import MinMaxScaler
 from ipywidgets import interact ## para análisis interactivo
 from sklearn import neighbors ### basado en contenido un solo producto consumido
 import joblib
+from mlxtend.preprocessing import TransactionEncoder
 #### conectar_base_de_Datos
 
 conn=sql.connect('Datos//db_movies_2')
@@ -63,33 +64,45 @@ pd.read_sql(consulta_sql, conn)
 ######## 2.1 Sistema de recomendación basado en contenido un solo producto - Manual ########
 #######################################################################
 
-movies=pd.read_sql('select * from movies_final', conn )
+movies=pd.read_sql('select * from full_ratings', conn )
 
 movies.info()
 
 
 ## eliminar filas que no se van a utilizar ###
+movies_dum1=pd.read_sql("""select * from full_ratings""", conn)
+genres=movies_dum1['genres'].str.split('|')
+te = TransactionEncoder()
+genres = te.fit_transform(genres)
+genres = pd.DataFrame(genres, columns = te.columns_)
+movies_dum1.genres.unique()
+genres.head()
+movies_dum1 = pd.concat([movies_dum1, genres], axis=1)
+movies_dum1
+# df_concatenado = pd.concat([df1, df2], axis=0)
 
-books_dum1=books.drop(columns=['isbn','i_url','year_pub','book_title'])
+movies_dum1=movies_dum1.drop(columns=['genres'])
+movies_dum1.head()
 
 #### convertir a dummies
 
-books_dum1['book_author'].nunique()
-books_dum1['publisher'].nunique()
+# movies_dum1['book_author'].nunique()
+# movies_dum1['publisher'].nunique()
 
-col_dum=['book_author','publisher']
-books_dum2=pd.get_dummies(books_dum1,columns=col_dum)
-books_dum2.shape
+col_dum=genres.columns
+movies_dum2=pd.get_dummies(movies_dum1,columns=col_dum)
+movies_dum2.shape
+movies_dum2.head()
 
-joblib.dump(books_dum2,"salidas\\books_dum2.joblib") ### para utilizar en segundos modelos
+joblib.dump(movies_dum2,"Datos//movies_dum2.joblib") ### para utilizar en segundos modelos
 
 
 
 ###### libros recomendadas ejemplo para un libro#####
 
-libro='The Testament'
-ind_libro=books[books['book_title']==libro].index.values.astype(int)[0]
-similar_books=books_dum2.corrwith(books_dum2.iloc[ind_libro,:],axis=1)
+pelicula='Toy Story (1995)'
+ind_libro=pelicula[pelicula['book_title']==pelicula].index.values.astype(int)[0]
+similar_books=movies_dum2.corrwith(movies_dum2.iloc[ind_libro,:],axis=1)
 similar_books=similar_books.sort_values(ascending=False)
 top_similar_books=similar_books.to_frame(name="correlación").iloc[0:11,] ### el 11 es número de libros recomendados
 top_similar_books['book_title']=books["book_title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
