@@ -64,62 +64,145 @@ pd.read_sql(consulta_sql, conn)
 ######## 2.1 Sistema de recomendación basado en contenido un solo producto - Manual ########
 #######################################################################
 
-movies=pd.read_sql('select * from full_ratings', conn )
+
+
+movies=pd.read_sql('select * from movies_final', conn )
 
 movies.info()
 
 
-## eliminar filas que no se van a utilizar ###
-movies_dum1=pd.read_sql("""select * from full_ratings""", conn)
-genres=movies_dum1['genres'].str.split('|')
+##### escalar para que año esté en el mismo rango ###
+
+genres=movies['genres'].str.split('|')
 te = TransactionEncoder()
 genres = te.fit_transform(genres)
 genres = pd.DataFrame(genres, columns = te.columns_)
-movies_dum1.genres.unique()
-genres.head()
-movies_dum1 = pd.concat([movies_dum1, genres], axis=1)
-movies_dum1
-# df_concatenado = pd.concat([df1, df2], axis=0)
+movies.genres.unique()
+movies_dum1 = pd.concat([movies, genres], axis=1)
+movies_dum1.info()
 
-movies_dum1=movies_dum1.drop(columns=['genres'])
-movies_dum1.head()
+## eliminar filas que no se van a utilizar ###
 
-#### convertir a dummies
+movies_dum1['year'] = movies_dum1['title'].str.extract(r'\((\d{4})\)')
+movies_dum1.info()
+movies_dum1['year']=movies_dum1.year.astype('int')
+sc=MinMaxScaler()
+movies_dum1[["year"]]=sc.fit_transform(movies_dum1[['year']])
+movies_dum1.info()
+movies_dum1=movies_dum1.drop(columns=['genres','title', 'movieId'])
+movies_dum1.info()
 
-# movies_dum1['book_author'].nunique()
-# movies_dum1['publisher'].nunique()
 
 col_dum=genres.columns
 movies_dum2=pd.get_dummies(movies_dum1,columns=col_dum)
 movies_dum2.shape
-movies_dum2.head()
 
-joblib.dump(movies_dum2,"Datos//movies_dum2.joblib") ### para utilizar en segundos modelos
+joblib.dump(movies_dum2,"Datos\\moviess_dum2.joblib") ### para utilizar en segundos modelos
 
-
+movies_dum2.info()
 
 ###### libros recomendadas ejemplo para un libro#####
 
-pelicula='Toy Story (1995)'
-ind_libro=pelicula[pelicula['book_title']==pelicula].index.values.astype(int)[0]
-similar_books=movies_dum2.corrwith(movies_dum2.iloc[ind_libro,:],axis=1)
-similar_books=similar_books.sort_values(ascending=False)
-top_similar_books=similar_books.to_frame(name="correlación").iloc[0:11,] ### el 11 es número de libros recomendados
-top_similar_books['book_title']=books["book_title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
+# pelicula='Toy Story (1995)'
+# ind_pelicula=movies[movies['title']==pelicula].index.values.astype(int)[0]
+# similar_movies=movies_dum2.corrwith(movies_dum2.iloc[ind_pelicula,:],axis=1)
+# similar_movies=similar_movies.sort_values(ascending=False)
+# top_similar_movies=similar_movies.to_frame(name="correlación").iloc[0:11,]### el 11 es número de libros recomendados
+# top_similar_movies['title']=movies["title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
     
 
 
 #### libros recomendados ejemplo para visualización todos los libros
 
-def recomendacion(libro = list(books['book_title'])):
+def recomendacion(pelicula = list(movies['title'])):
      
-    ind_libro=books[books['book_title']==libro].index.values.astype(int)[0]   #### obtener indice de libro seleccionado de lista
-    similar_books = books_dum2.corrwith(books_dum2.iloc[ind_libro,:],axis=1) ## correlación entre libro seleccionado y todos los otros
-    similar_books = similar_books.sort_values(ascending=False) #### ordenar correlaciones
-    top_similar_books=similar_books.to_frame(name="correlación").iloc[0:11,] ### el 11 es número de libros recomendados
-    top_similar_books['book_title']=books["book_title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
-    
-    return top_similar_books
+    ind_pelicula=movies[movies['title']==pelicula].index.values.astype(int)[0]
+    similar_movies=movies_dum2.corrwith(movies_dum2.iloc[ind_pelicula,:],axis=1)
+    similar_movies=similar_movies.sort_values(ascending=False)
+    top_similar_movies=similar_movies.to_frame(name="correlación").iloc[0:11,]### el 11 es número de libros recomendados
+    top_similar_movies['title']=movies["title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
+      
+    return top_similar_movies
 
 
 print(interact(recomendacion))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# movies=pd.read_sql('select * from full_ratings', conn )
+
+# movies.info()
+
+
+# ## eliminar filas que no se van a utilizar ###
+# movies_dum1=pd.read_sql("""select * from full_ratings""", conn)
+# genres=movies_dum1['genres'].str.split('|')
+# te = TransactionEncoder()
+# genres = te.fit_transform(genres)
+# genres = pd.DataFrame(genres, columns = te.columns_)
+# movies_dum1.genres.unique()
+# genres.head()
+# movies_dum1 = pd.concat([movies_dum1, genres], axis=1)
+# movies_dum1
+# # df_concatenado = pd.concat([df1, df2], axis=0)
+
+# movies_dum1=movies_dum1.drop(columns=['genres'])
+# movies_dum1.head()
+
+# #### convertir a dummies
+
+# # movies_dum1['book_author'].nunique()
+# # movies_dum1['publisher'].nunique()
+
+# col_dum=genres.columns
+# movies_dum2=pd.get_dummies(movies_dum1,columns=col_dum)
+# movies_dum2.shape
+# movies_dum2.head()
+
+# joblib.dump(movies_dum2,"Datos//movies_dum2.joblib") ### para utilizar en segundos modelos
+
+
+
+# ###### libros recomendadas ejemplo para un libro#####
+
+# pelicula='Toy Story (1995)'
+# ind_pelicula=movies[movies['title']==pelicula].index.values.astype(int)[0]
+# similar_movies=movies_dum2.corrwith(movies_dum2.iloc[ind_pelicula,:],axis=1)
+# similar_movies=similar_movies.sort_values(ascending=False)
+# top_similar_movies=similar_movies.to_frame(name="correlación").iloc[0:11,] ### el 11 es número de libros recomendados
+# top_similar_movies['title']=movies["title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
+    
+
+
+# #### libros recomendados ejemplo para visualización todos los libros
+
+# def recomendacion(libro = list(books['book_title'])):
+     
+#     ind_libro=books[books['book_title']==libro].index.values.astype(int)[0]   #### obtener indice de libro seleccionado de lista
+#     similar_books = books_dum2.corrwith(books_dum2.iloc[ind_libro,:],axis=1) ## correlación entre libro seleccionado y todos los otros
+#     similar_books = similar_books.sort_values(ascending=False) #### ordenar correlaciones
+#     top_similar_books=similar_books.to_frame(name="correlación").iloc[0:11,] ### el 11 es número de libros recomendados
+#     top_similar_books['book_title']=books["book_title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
+    
+#     return top_similar_books
+
+
+# print(interact(recomendacion))
