@@ -1,5 +1,4 @@
 
-#%%
 import pandas as pd
 import sqlite3 as sql ### para conectarse a BD
 from mlxtend.preprocessing import TransactionEncoder
@@ -7,7 +6,6 @@ import plotly.graph_objs as go ### para gráficos
 import plotly.express as px
 import a_funciones as fn
 
-#%%
 ##### conectarse a BD #######
 conn= sql.connect('Datos\db_movies_2')
 cur=conn.cursor()
@@ -54,7 +52,6 @@ movies.duplicated().sum()
 
 ratings.rating.unique()
 
-#%%
 consulta_sql = """
     SELECT rating, COUNT(*) AS n_movies
     FROM ratings
@@ -72,7 +69,7 @@ Layout=go.Layout(title="Count of ratings",xaxis={'title':'Rating'},yaxis={'title
 go.Figure(data,Layout)
 
 
-#%%
+
 consulta_sql = """
         SELECT userId as user, COUNT(*) AS n_id
         FROM ratings
@@ -83,6 +80,9 @@ consulta_sql = """
 ### calcular cada usuario cuátas peliculas calificó
 rating_users=pd.read_sql(consulta_sql, conn )
 
+### Se visualiza que hay algunos valores exrtemos, por lo que serían personas que han visto más de 2000 peliculas, estos valores se pueden tomar
+### como atipicos y se podrían llegar a reducir hasta un total de 600 peliculas desde mi punto de vista y siguiendo los valores dados por las descripción
+### de los userId.
 fig  = px.histogram(rating_users, x= 'n_id', title= 'Hist frecuencia de numero de calificaciones por usario')
 fig.show() 
 
@@ -90,12 +90,7 @@ fig.show()
 rating_users.describe()
 
 
-### Se visualiza que hay algunos valores exrtemos, por lo que serían personas que han visto más de 2000 peliculas, estos valores se pueden tomar
-### como atipicos y se podrían llegar a reducir hasta un total de 600 peliculas desde mi punto de vista y siguiendo los valores dados por las descripción
-### de los userId.
 
-
-#%%
 consulta_sql = """
         SELECT userId as user, COUNT(*) AS n_id
         FROM ratings
@@ -105,7 +100,7 @@ consulta_sql = """
 """
 
 #### filtrar usuarios con más de 50 libros calificados (para tener calificaion confiable) y los que tienen mas de mil porque pueden ser no razonables
-rating_users2=pd.read_sql(consulta_sql,conn )
+rating_users2= pd.read_sql(consulta_sql,conn )
 
 
 fig  = px.histogram(rating_users2, x= 'n_id', title= 'Hist frecuencia de numero de calificaciones por usario')
@@ -115,13 +110,9 @@ fig.show()
 rating_users2.describe()
 
 
-
-
 ### Despues de la reducción se de los datos atipicos podemos ver un mejor comportamientos y distribución de los datos
 ### Pero aun se puede proponer reducir más o menos estos datos.
 
-
-#%%
 
 
 consulta_sql = """
@@ -163,35 +154,32 @@ fig.show()
 
 rating_movie2.describe()
 
+###########
+fn.ejecutar_sql('preprocesamientos.sql', cur)
+
+cur.execute("select name from sqlite_master where type='table' ")
+cur.fetchall()
 
 
-
-# ###########
-# fn.ejecutar_sql('preprocesamientos.sql', cur)
-
-# cur.execute("select name from sqlite_master where type='table' ")
-# cur.fetchall()
+### verficar tamaño de tablas con filtros ####
 
 
-# ### verficar tamaño de tablas con filtros ####
+####movies
 
+pd.read_sql('select count(*) from movies', conn)
+pd.read_sql('select count(*) from movies_final', conn)
 
-# ####movies
+##ratings
+pd.read_sql('select count(*) from ratings', conn)
+pd.read_sql('select count(*) from ratings_final', conn)
 
-# pd.read_sql('select count(*) from movies', conn)
-# pd.read_sql('select count(*) from movies_final', conn)
+## 3 tablas cruzadas ###
+pd.read_sql('select count(*) from full_ratings', conn)
 
-# ##ratings
-# pd.read_sql('select count(*) from ratings', conn)
-# pd.read_sql('select count(*) from ratings_final', conn)
-
-# ## 3 tablas cruzadas ###
-# pd.read_sql('select count(*) from full_ratings', conn)
-
-# ratings=pd.read_sql('select * from full_ratings',conn)
-# ratings.duplicated().sum() ## al cruzar tablas a veces se duplican registros
-# ratings.info()
-# ratings.head(10)
+ratings=pd.read_sql('select * from full_ratings',conn)
+ratings.duplicated().sum() ## al cruzar tablas a veces se duplican registros
+ratings.info()
+ratings.head(10)
 
 
 
@@ -200,10 +188,9 @@ rating_movie2.describe()
 
 
 
-# movies=pd.read_sql("""select * from movies""", conn)
-# genres=movies['genres'].str.split('|')
-# te = TransactionEncoder()
-# genres = te.fit_transform(genres)
-# genres = pd.DataFrame(genres, columns = te.columns_)
+movies=pd.read_sql("""select * from movies""", conn)
+genres=movies['genres'].str.split('|')
+te = TransactionEncoder()
+genres = te.fit_transform(genres)
+genres = pd.DataFrame(genres, columns = te.columns_)
 
-# %%
