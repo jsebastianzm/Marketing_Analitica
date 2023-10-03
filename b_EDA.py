@@ -42,15 +42,15 @@ movies = pd.read_sql(consulta_sql, conn)
 ### Identificar campos de cruce y verificar que estén en mismo formato ####
 ### verificar duplicados
 
-ratings.info()
-ratings.head()
-ratings.duplicated().sum() 
+# ratings.info()
+# ratings.head()
+# ratings.duplicated().sum() 
 
-movies.info()
-movies.head()
-movies.duplicated().sum() 
+# movies.info()
+# movies.head()
+# movies.duplicated().sum() 
 
-ratings.rating.unique()
+# ratings.rating.unique()
 
 
 
@@ -285,8 +285,8 @@ pd.read_sql('select count(*) from full_ratings', conn)
 
 ratings=pd.read_sql('select * from full_ratings',conn)
 ratings.duplicated().sum() ## al cruzar tablas a veces se duplican registros
-ratings.info()
-ratings.head(10)
+# ratings.info()
+# ratings.head(10)
 
 
 movies=pd.read_sql("""select * from movies""", conn)
@@ -297,6 +297,6 @@ genres = pd.DataFrame(genres, columns = te.columns_)
 
 
 
-pd.read_sql('select * from ratings_final', conn)
+# pd.read_sql('select * from ratings_final', conn)
 
-pd.read_sql('select * from movies_final', conn)
+# pd.read_sql('select * from movies_final', conn)

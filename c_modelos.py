@@ -84,7 +84,7 @@ genres = te.fit_transform(genres)
 genres = pd.DataFrame(genres, columns = te.columns_)
 movies.genres.unique()
 movies_dum1 = pd.concat([movies, genres], axis=1)
-movies_dum1.info()
+# movies_dum1.info()
 
 ## eliminar filas que no se van a utilizar ###
 
@@ -95,7 +95,7 @@ sc=MinMaxScaler()
 movies_dum1[["year"]]=sc.fit_transform(movies_dum1[['year']])
 movies_dum1.info()
 movies_dum1=movies_dum1.drop(columns=['genres','title', 'movieId'])
-movies_dum1.info()
+# movies_dum1.info()
 
 
 col_dum=genres.columns
@@ -104,7 +104,7 @@ movies_dum2.shape
 
 joblib.dump(movies_dum2,"Datos\\moviess_dum2.joblib") ### para utilizar en segundos modelos
 
-movies_dum2.info()
+# movies_dum2.info()
 
 ###### movies recomendadas ejemplo para un pelicula#####
 
