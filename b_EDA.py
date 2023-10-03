@@ -72,10 +72,14 @@ pd.read_sql("""select movieId, avg(rating)
             where movieId=1
             group by movieId order by userId asc""", conn)
 
-####4
-pd.read_sql("""select a.title, count(b.rating) as cnt
-            from movies a left join ratings b on a.movieId=b.movieId 
-            group by a.title where b.rating is null order by cnt asc """, conn)
+### 4.	¿Cuántos usuarios han calificado al menos 50 películas diferentes?
+consulta_sql = """
+    SELECT userId, COUNT(DISTINCT movieId) AS numero_peliculas
+    FROM ratings
+    GROUP BY userId
+    HAVING numero_peliculas >= 50
+"""
+pd.read_sql(consulta_sql, conn)
 
 ####5
 pd.read_sql("""select a.title, count(b.rating) as cnt

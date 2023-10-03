@@ -103,12 +103,12 @@ movies_dum2.info()
 
 ###### libros recomendadas ejemplo para un libro#####
 
-# pelicula='Toy Story (1995)'
-# ind_pelicula=movies[movies['title']==pelicula].index.values.astype(int)[0]
-# similar_movies=movies_dum2.corrwith(movies_dum2.iloc[ind_pelicula,:],axis=1)
-# similar_movies=similar_movies.sort_values(ascending=False)
-# top_similar_movies=similar_movies.to_frame(name="correlación").iloc[0:11,]### el 11 es número de libros recomendados
-# top_similar_movies['title']=movies["title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
+pelicula='Toy Story (1995)'
+ind_pelicula=movies[movies['title']==pelicula].index.values.astype(int)[0]
+similar_movies=movies_dum2.corrwith(movies_dum2.iloc[ind_pelicula,:],axis=1)
+similar_movies=similar_movies.sort_values(ascending=False)
+top_similar_movies=similar_movies.to_frame(name="correlación").iloc[0:11,]### el 11 es número de libros recomendados
+top_similar_movies['title']=movies["title"] ### agregaro los nombres (como tiene mismo indice no se debe cruzar)
     
 
 
