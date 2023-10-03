@@ -295,3 +295,8 @@ te = TransactionEncoder()
 genres = te.fit_transform(genres)
 genres = pd.DataFrame(genres, columns = te.columns_)
 
+
+
+pd.read_sql('select * from ratings_final', conn)
+
+pd.read_sql('select * from movies_final', conn)
